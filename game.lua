@@ -78,7 +78,7 @@ local function updateText()
 
 		  local newAsteroid = display.newImageRect( mainGroup, objectSheet, 1, 102, 85 )
 			table.insert( asteroidsTable, newAsteroid )
-			physics.addBody( newAsteroid, "dynamic", { radius=40 bounce=0.8 } )
+			physics.addBody( newAsteroid, "dynamic", { radius=40, bounce=0.8 } )
 			newAsteroid.myName = "asteroid"
 
 			local whereFrom = math.random( 3 )
@@ -115,7 +115,7 @@ local function fireLaser()
 		newLaser.y = ship.y
 		newLaser:toBack()
 
-		transition.to( newLaser, { y=-40, time=500, } )
+		transition.to( newLaser, { y=-40, time=500,
 		    onComplete = function() display.remove( newLaser ) end
 		} )
 end
@@ -182,6 +182,10 @@ local function restoreShip()
 end
 
 
+local function endGame()
+	  composer.setVariable( "finalScore", score )
+		composer.gotoScene( "highscores", {time=800, effect="crossFade" } )
+end
 local function onCollision( event )
 
     if ( event.phase == "began" ) then
@@ -219,6 +223,7 @@ local function onCollision( event )
 
                 if ( lives == 0 ) then
                     display.remove( ship )
+										timer.performWithDelay( 2000, endGame )
                 else
                     ship.alpha = 0
                     timer.performWithDelay( 1000, restoreShip )
@@ -247,6 +252,27 @@ function scene:create( event )
 
 	mainGroup = display.newGroup() -- Display group for the ship, asteroid, lasers, etc.
 	sceneGroup:insert( mainGroup ) -- Insert into the scene's view Group
+
+	uiGroup = display.newGroup()   -- Display group for UI objects like the score
+	sceneGroup:insert( uiGroup )   -- Insert into the scene's view group
+
+	-- Load the background
+	local background = display.newImageRect( backGroup, "background.png", 800, 1400 )
+	background.x = display.contentCenterX
+	background.y = display.contentCenterY
+
+	ship = display.newImageRect( mainGroup, objectSheet, 4, 98, 79 )
+	ship.x = display.contentCenterX
+	ship.y = display.contentHeight - 100
+	physics.addBody( ship, { radius=30, isSensor=true} )
+	ship.myName = "ship"
+
+	--Display lives and score
+	livesText = display.newText( uiGroup, "Lives: " .. lives, 200, 80, native.systemFont, 36 )
+	scoreText = display.newText( uiGroup, "score: " .. score, 400, 80, native.systemFont, 36 )
+
+	ship:addEventListener( "tap", fireLaser )
+	ship:addEventListener( "touch", dragShip )
 end
 
 
@@ -261,7 +287,9 @@ function scene:show( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen
-
+    physics.start()
+		Runtime:addEventListener( "collision", onCollision )
+		gameLoopTimer = timer.performWithDelay( 500, gameLoop, 0 )
 	end
 end
 
@@ -274,9 +302,14 @@ function scene:hide( event )
 
 	if ( phase == "will" ) then
 		-- Code here runs when the scene is on screen (but is about to go off screen)
+    timer.cancel( gameLoopTimer )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
+    Runtime:removeEventListener( "collision", onCollision )
+		physics.pause()
+composer.removeScene( "game" )
+
 
 	end
 end
