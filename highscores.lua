@@ -8,7 +8,12 @@ local scene = composer.newScene()
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
 
+-- Initialize variables
+local json = require( "json" )
 
+local scoresTable = {}
+
+local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
 
 
 -- -----------------------------------------------------------------------------------
