@@ -89,12 +89,12 @@ function scene:create( event )
 					rankNum:setFillColor( 0.8 )
 					rankNum.anchorX = 1
 
-					local thisScore = display.newText( sceneGroup, scoresTables[i], display.contentCenterX-30, yPos, native.systemFont, 36 )
+					local thisScore = display.newText( sceneGroup, scoresTable[i], display.contentCenterX-30, yPos, native.systemFont, 36 )
 					thisScore.anchorX = 0
 				end
 			end
 
-			local menuButton = display.newText( scene Group, "menu", display.contentCenterX, 810, native.systemFont, 44 )
+			local menuButton = display.newText( sceneGroup, "menu", display.contentCenterX, 810, native.systemFont, 44 )
 			menuButton:setFillColor( 0.75, 0.78, 1 )
 			menuButton:addEventListener( "tap", gotoMenu )
 		end
@@ -130,7 +130,7 @@ function scene:hide( event )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
-
+    composer.removeScene( "highscores" )
 	end
 end
 
